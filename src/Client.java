@@ -1,5 +1,7 @@
 import java.io.*;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Client {
@@ -27,46 +29,42 @@ public class Client {
 
         try {
             Scanner scanner = new Scanner(System.in);
-            //System.out.println(bufferedReader.readLine()); // Enter your username
-            //System.out.println("enter your username : ");
-            //String username = scanner.nextLine();
-
 
             bufferedWriter.write(username);
             bufferedWriter.newLine();
             bufferedWriter.flush();
-
-            //System.out.println(bufferedReader.readLine()); // Enter your password
-           // System.out.println("enter your password : ");
-            //String password = scanner.nextLine();
 
             bufferedWriter.write(password);
             bufferedWriter.newLine();
             bufferedWriter.flush();
 
             String response = bufferedReader.readLine();
-            System.out.println(response);
-           // Scanner scanner = new Scanner(System.in);
-            if(response.equals("Authentication successful. You can chat now.")) {
+            if(response.equals("Authentication successful.")) {
                 System.out.println("Start chatting (type 'bye' to quit)");
+
+                File file = new File(username + ".txt");
+                if(file.exists()) {
+                    file.delete();
+                }
 
                 // Read the input from client and send it the server
                 listenToMessage();
                 while (socket.isConnected()) {
                     String msgToSend = scanner.nextLine();
+
                     listenToMessage();
                     bufferedWriter.write(username + ": " + msgToSend);
                     bufferedWriter.newLine();
                     bufferedWriter.flush();
 
-
-
                     if(msgToSend.equalsIgnoreCase("bye")) {
+                        beforeExit();
                         System.exit(0);
                     } else {
                         saveMessage(msgToSend , username);
                     }
                 }
+
             }
         } catch (IOException e) {
             e.getMessage();
@@ -98,6 +96,78 @@ public class Client {
         }
     }
 
+    public void beforeExit() {
+        try (Scanner scanner = new Scanner(new File(username + ".txt"))){
+
+            Map<String , Integer> countWords = new HashMap<>();
+
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] words = line.split(" ");
+                for (String word : words) {
+                    if(countWords.containsKey(word)) {
+                        int temp = countWords.get(word);
+                        temp++;
+                        countWords.put(word , temp);
+                    } else {
+                        countWords.put(word , 1);
+                    }
+                }
+            }
+            saveStatistics(username , countWords);
+
+        } catch (IOException es) {
+            es.getMessage();
+        }
+    }
+
+    public void saveStatistics(String username , Map<String , Integer> countWords) {
+        Map<String , Integer> oldStatistics = getOldStatistics(username);
+
+        try (PrintWriter writer = new PrintWriter(new FileWriter(username + "_statistics.txt" , false))){
+            if (!oldStatistics.isEmpty()) {
+                for (Map.Entry<String , Integer> map : countWords.entrySet()) {
+                    if(oldStatistics.containsKey(map.getKey())) {
+                        int temp = map.getValue() + oldStatistics.get(map.getKey());
+                        oldStatistics.put(map.getKey() , temp);
+                    } else {
+                        oldStatistics.put(map.getKey() , 1);
+                    }
+
+                }
+                for (Map.Entry<String , Integer> data : oldStatistics.entrySet()) {
+                    System.out.println(data.getKey() + "====>" + data.getValue());
+                    writer.println(data.getKey() + ":" + data.getValue().toString());
+                }
+            } else {
+                for (Map.Entry<String , Integer> map : countWords.entrySet()) {
+                    writer.println(map.getKey() + ":" + map.getValue().toString());
+                }
+            }
+        } catch (IOException e) {
+            e.getMessage();
+        }
+    }
+
+    public Map<String, Integer> getOldStatistics(String username) {
+        Map<String , Integer> oldStatistics = new HashMap<>();
+        File file = new File(username + "_statistics.txt");
+        try {
+            if(file.exists()) {
+                Scanner scanner = new Scanner(file);
+                while (scanner.hasNextLine()) {
+                    String line = scanner.nextLine();
+                    String[] parts = line.split(":");
+                    if(parts.length == 2) {
+                        oldStatistics.put(parts[0] , Integer.valueOf(parts[1]));
+                    }
+                }
+            }
+        } catch (FileNotFoundException e) {
+            e.getMessage();
+        }
+        return oldStatistics;
+    }
 
     public static void main(String[] args) throws IOException {
 
@@ -112,10 +182,5 @@ public class Client {
         Client client = new Client(socket , username , password);
 
         client.sendMessage();
-        //client.listenToMessage();
-
-
-
-
     }
 }

@@ -3,7 +3,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 public class ClientHandler implements Runnable{
     public static ArrayList<ClientHandler> connectedClients = new ArrayList<>();
@@ -19,14 +18,7 @@ public class ClientHandler implements Runnable{
             this.socket = socket;
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            //this.clientUsername = bufferedReader.readLine();
-            //this.clientPassword = bufferedReader.readLine();
-            //System.out.println(clientUsername + " : " + clientPassword);
-            //connectedClients.add(this);
-           // broadcastMessage("SERVER: " + clientUsername + " has entered the chat!");
             this.userDatabase = userDatabase;
-//            userDatabase.put("user1", "password1"); // Sample user and password, replace with your own database
-//            userDatabase.put("user2", "password2"); // Sample user and password, replace with your own database
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -37,16 +29,11 @@ public class ClientHandler implements Runnable{
     public void run() {
 
         try {
-            //bufferedWriter.write("enter your name:");
             this.clientUsername = bufferedReader.readLine();
-               // System.out.println(clientUsername);
-            //bufferedWriter.write("enter your password:");
             this.clientPassword = bufferedReader.readLine();
 
-
-
             if(authenticate(clientUsername, clientPassword)) {
-                bufferedWriter.write("Authentication successful. You can chat now.");
+                bufferedWriter.write("Authentication successful.");
                 bufferedWriter.newLine();
                 bufferedWriter.flush();
 
@@ -80,9 +67,6 @@ public class ClientHandler implements Runnable{
     }
 
     public void broadcastMessage(String messageToSend) {
-        //System.out.println(messageToSend);
-        //System.out.println(clientHandlers.size());
-        //System.out.println(connectedClients.get(0).clientUsername + " " + connectedClients.get(1).clientUsername);
         for (ClientHandler clientHandler : connectedClients) {
             System.out.println(clientHandler.clientUsername);
         }

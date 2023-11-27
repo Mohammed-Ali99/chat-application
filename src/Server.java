@@ -14,9 +14,6 @@ public class Server {
 
     public Server(ServerSocket serverSocket) {
         this.serverSocket = serverSocket;
-        //userDatabase = new HashMap<>();
-//        userDatabase.put("user1" , "password1");
-//        userDatabase.put("user2" , "password2");
     }
 
     public void startServer() {
@@ -56,6 +53,8 @@ public class Server {
         try (PrintWriter writer = new PrintWriter(new FileWriter(USER_FILE_PATH))){
             writer.println("user1:password1");
             writer.println("user2:password2");
+            writer.println("user3:password3");
+            writer.println("user4:password4");
         } catch (IOException e) {
             e.printStackTrace();
         }
