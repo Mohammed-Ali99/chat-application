@@ -20,7 +20,7 @@ public class ClientHandler implements Runnable{
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.userDatabase = userDatabase;
         } catch (IOException e) {
-            e.printStackTrace();
+            closeEverything(socket , bufferedWriter , bufferedReader);
         }
     }
 
@@ -45,7 +45,7 @@ public class ClientHandler implements Runnable{
                 while (socket.isConnected()) {
                     msgFromClient = bufferedReader.readLine();
                     if (msgFromClient.equalsIgnoreCase("bye")) {
-                        break;
+                        System.exit(0);
                     }
 
                     broadcastMessage(msgFromClient);
@@ -57,7 +57,7 @@ public class ClientHandler implements Runnable{
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            closeEverything(socket , bufferedWriter , bufferedReader);
         }
     }
 
@@ -75,8 +75,24 @@ public class ClientHandler implements Runnable{
                     clientHandler.bufferedWriter.flush();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                closeEverything(socket , bufferedWriter , bufferedReader);
             }
+        }
+    }
+
+    public void removeClient() {
+        connectedClients.remove(this);
+        broadcastMessage("SERVER: " + clientUsername + " has left the chat!");
+    }
+
+    public void closeEverything(Socket socket , BufferedWriter writer , BufferedReader reader) {
+        removeClient();
+        try {
+            if(socket != null) socket.close();
+            if(writer != null) writer.close();
+            if(reader != null) reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

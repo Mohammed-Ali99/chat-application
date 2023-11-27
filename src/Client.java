@@ -20,7 +20,7 @@ public class Client {
             this.username = username;
             this.password = password;
         } catch (IOException e) {
-            e.getMessage();
+            closeEverything(socket , bufferedReader , bufferedWriter);
         }
     }
 
@@ -67,7 +67,7 @@ public class Client {
 
             }
         } catch (IOException e) {
-            e.getMessage();
+            closeEverything(socket , bufferedReader , bufferedWriter);
         }
     }
 
@@ -81,7 +81,7 @@ public class Client {
                         msgFromGroupChat = bufferedReader.readLine();
                         System.out.println(msgFromGroupChat);
                     } catch (IOException e) {
-                        e.getMessage();
+                        closeEverything(socket , bufferedReader , bufferedWriter);
                     }
                 }
             }
@@ -167,6 +167,16 @@ public class Client {
             e.getMessage();
         }
         return oldStatistics;
+    }
+
+    public void closeEverything(Socket socket , BufferedReader reader , BufferedWriter writer) {
+        try {
+            if(socket != null) socket.close();
+            if(writer != null) writer.close();
+            if(reader != null) reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void main(String[] args) throws IOException {
