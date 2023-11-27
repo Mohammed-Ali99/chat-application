@@ -33,12 +33,12 @@ public class ClientHandler implements Runnable{
             this.clientPassword = bufferedReader.readLine();
 
             if(authenticate(clientUsername, clientPassword)) {
+                System.out.println("A new client has connected");
                 bufferedWriter.write("Authentication successful.");
                 bufferedWriter.newLine();
                 bufferedWriter.flush();
 
                 connectedClients.add(this);
-                System.out.println(this.clientUsername);
                 broadcastMessage("SERVER: " + clientUsername + " has joined the chat");
 
                 String msgFromClient;
@@ -67,10 +67,6 @@ public class ClientHandler implements Runnable{
     }
 
     public void broadcastMessage(String messageToSend) {
-        for (ClientHandler clientHandler : connectedClients) {
-            System.out.println(clientHandler.clientUsername);
-        }
-
         for(ClientHandler clientHandler : connectedClients) {
             try {
                 if(!clientHandler.clientUsername.equals(clientUsername)) {

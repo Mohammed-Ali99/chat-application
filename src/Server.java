@@ -21,7 +21,6 @@ public class Server {
         try {
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                System.out.println("A new client has connected");
 
                 ClientHandler clientHandler = new ClientHandler(clientSocket , userDatabase);
                 Thread thread = new Thread(clientHandler);
